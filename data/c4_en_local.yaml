@@ -1,6 +1,0 @@
-dataset_name: c4_en_local
-load_from_disk: false
-path: json
-data_files:
-  train: /scratch3/li309/data/llm_data/c4/en/
-text_column: text
