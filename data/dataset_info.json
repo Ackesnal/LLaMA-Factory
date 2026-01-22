@@ -736,12 +736,5 @@
     "subset": "en",
     "split": "train",
     "columns": { "prompt": "text" }
-  },
-  "c4_en_local": {
-    "file_name": "c4_en_local.jsonl",
-    "columns": {
-      "prompt": "text",
-      "text": "text"
-    }
   }
 }
