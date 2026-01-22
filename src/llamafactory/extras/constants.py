@@ -43,7 +43,7 @@ FILEEXT2TYPE = {
     "arrow": "arrow",
     "csv": "csv",
     "json": "json",
-    "gz": "gz",
+    "gz": "json",
     "jsonl": "json",
     "parquet": "parquet",
     "txt": "text",
