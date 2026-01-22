@@ -19,14 +19,6 @@ conda activate llama_factory_rocm
 
 cd /scratch/user/uqxxu16/LLaMA-Factory
 
-export HF_TOKEN=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
-export WORK_DIR=/scratch/user/uqxxu16/LLaMA-Factory
-export HF_HOME=$TMPDIR/hf_cache/${SLURM_ARRAY_TASK_ID}
-export HF_DATASETS_CACHE=$TMPDIR/hf_datasets/${SLURM_ARRAY_TASK_ID}
-export TOKENIZERS_PARALLELISM=false
-export WANDB_API_KEY=0ade9853dc308fb5e9cccff325a70f046904c2cb
-export WANDB_PROJECT="RePa-Qwen3-8B-C4-FT"
-export WANDB_ENTITY="ackesnal-ai"
 
 python ${WORK_DIR}/models/repa_qwen3_8b/stage1_infer_and_save.py \
     --model_dir ${WORK_DIR}/models/repa_qwen3_8b/original \
