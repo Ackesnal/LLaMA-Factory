@@ -37,6 +37,8 @@ def loadModel(model_name, cache_dir=None):
     "llama" in model_name.lower()
     or "phi-3" in model_name.lower()
     or "qwen2" in model_name.lower()
+    or "qwen3" in model_name.lower()
+    or "mistral" in model_name.lower()
   ):
     dtype = torch.bfloat16
   else:
@@ -148,7 +150,7 @@ def main():
     evaluate_inference_time(model, first_calibration_sample)
 
   if args.evaluate_downstream == True:
-    evaluation_downstream(model, args.model)
+    evaluation_downstream(args.model)
 
   if args.main_table_results == True:
     evaluation_ppl(model, wikitext_input_ids, c4_val_input_ids, fineweb_edu_input_ids)

@@ -1,7 +1,7 @@
 import os
 import logging
 import torch
-import lm_eval
+from lm_eval import evaluator
 from tqdm import tqdm
 
 import torch
@@ -70,10 +70,9 @@ def evaluate_perplexity(
 
 
 # Downstream tasks evaluation with Lm Eval Harness
-def evaluation_downstream(model, model_name, num_fewshot=0):
+def evaluation_downstream(model, num_fewshot=0):
   task_list = ["winogrande", "arc_easy", "arc_challenge", "hellaswag", "piqa", "mmlu"]
   results = eval_zero_shot(
-    model_name,
     model,
     task_list,
     num_fewshot=num_fewshot,
@@ -90,28 +89,36 @@ def evaluation_downstream(model, model_name, num_fewshot=0):
 # The following code was sourced and adapted from the repository:
 # https://github.com/eliacunegatti/NeuroAL
 def eval_zero_shot(
-  model_name,
   model,
   task_list=["arc_challenge", "arc_easy", "hellaswag", "piqa", "winogrande"],
   num_fewshot=0,
   use_accelerate=False,
   access_token=None,
 ):
-  model_args = f"token={access_token}"
   limit = None
-  if "70b" in model_name or "65b" in model_name:
+  if "70b" in model or "65b" in model:
     limit = 2000
-  if use_accelerate:
-    model_args = f"use_accelerate=True"
+  
+  model_args_kv = [
+    f"pretrained={model}",
+    "trust_remote_code=True",
+    "device_map=auto",
+    "dtype=bfloat16",
+  ]
+  
+  if access_token:
+    model_args_kv.append(f"token={access_token}")
+  
+  model_args = ",".join(model_args_kv)
 
   logging.info(f"Testing tasks: {task_list}")
-  model_obj = lm_eval.models.huggingface.HFLM(pretrained=model)
-  results = lm_eval.evaluator.simple_evaluate(
-    model=model_obj,
+  
+  results = evaluator.simple_evaluate(
+    model="hf",
     model_args=model_args,
     tasks=task_list,
     num_fewshot=num_fewshot,
-    batch_size=None,
+    batch_size="auto",
     device=None,
     limit=limit,
     check_integrity=False,
