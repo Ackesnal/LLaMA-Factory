@@ -22,7 +22,7 @@ lora_target: all
 
 dataset_dir: data
 dataset: c4_en_local
-streaming: true
+streaming: false
 template: qwen3
 cutoff_len: 2048
 # max_samples: 1000
