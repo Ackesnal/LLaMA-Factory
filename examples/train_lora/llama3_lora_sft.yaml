@@ -19,14 +19,13 @@ lora_target: all
 #preprocessing_num_workers: 16
 #dataloader_num_workers: 4
 
-
 dataset: json
 dataset_dir: null
 data_files: /scratch3/li309/data/llm_data/c4/en/c4-train.*.json.gz
 text_column: text
 streaming: true
 cutoff_len: 2048
-max_samples: 1000
+max_steps: 1000
 template: qwen3
 overwrite_cache: true
 preprocessing_num_workers: 16
