@@ -1,0 +1,54 @@
+### model
+cache_dir: $TMPDIR/hf_cache
+model_name_or_path: /scratch/user/uqxxu16/LLaMA-Factory/models/repa_mistral_7b/inferred_ratio0.8
+trust_remote_code: true
+
+### method
+stage: pt
+do_train: true
+finetuning_type: freeze
+freeze_trainable_layers: 32
+freeze_trainable_modules: mlp.gate_scaler,mlp.down_proj.weight,post_attention_layernorm.weight,input_layernorm.weight
+flash_attn: fa2
+
+### dataset
+dataset: c4_en
+streaming: true
+template: mistral
+cutoff_len: 2048
+# max_samples: 1000
+overwrite_cache: true
+# preprocessing_num_workers: 0
+dataloader_num_workers: 20
+dataloader_pin_memory: true
+
+### output
+output_dir: /scratch/user/uqxxu16/LLaMA-Factory/models/repa_mistral_7b/finetuned_ratio0.8
+logging_steps: 10
+save_steps: 500
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: wandb # choices: [none, wandb, tensorboard, swanlab, mlflow]
+run_name: repa_mistral_7b_ratio0.8_c4_pt
+
+### train
+per_device_train_batch_size: 8
+gradient_accumulation_steps: 4
+learning_rate: 4.0e-5
+max_steps: 4096
+# num_train_epochs: 1.0
+lr_scheduler_type: cosine
+warmup_ratio: 0.05
+bf16: true
+fp16: false
+ddp_timeout: 180000000
+resume_from_checkpoint: null
+gradient_checkpointing: false
+optim: adamw_torch
+
+### eval
+val_size: 1000
+per_device_eval_batch_size: 1
+eval_strategy: steps
+eval_steps: 200
