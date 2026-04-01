@@ -38,7 +38,7 @@ def main():
         dtype=dtype,
         trust_remote_code=True,
     ).to(args.device)
-    model.set_attn_implementation("sdpa")
+    model.set_attn_implementation("flash_attention_2")
     model.eval()
 
     # Streaming C4-en

@@ -6,7 +6,7 @@ def load_wikitext2(local=False):
     dataset = load_from_disk("data/wikitext-2")
   else:
     try:
-      dataset = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")
+      dataset = load_dataset("Salesforce/wikitext", "wikitext-2-raw-v1", split="test", revision="main")
     except:
       logging.error(
         "Unable to download Wikitext-2 dataset from huggingface. Falling back to local version"

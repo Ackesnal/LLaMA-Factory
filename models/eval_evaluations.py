@@ -160,6 +160,52 @@ def evaluate_inference_time(model, sample):
 
   average_time = sum(times) / n_runs
   logging.info(f"Average Inference Time: {average_time:.6f} seconds")
+  
+  
+@torch.no_grad()
+def evaluate_generation_speed(model, sample, n_runs=10, max_new_tokens=128):
+    """Measure autoregressive generation speed in tokens/second."""
+    sample = sample.to("cuda")
+
+    # Warmup generation
+    for _ in range(3):
+        _ = model.generate(sample, max_new_tokens=max_new_tokens, do_sample=False)
+
+    gen_times = []
+    total_tokens_list = []
+
+    for i in range(n_runs):
+        torch.cuda.synchronize()
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
+
+        start.record()
+        output = model.generate(sample, max_new_tokens=max_new_tokens, do_sample=False)
+        end.record()
+
+        torch.cuda.synchronize()
+
+        elapsed_ms = start.elapsed_time(end)  # milliseconds
+        num_new_tokens = output.shape[-1] - sample.shape[-1]
+
+        gen_times.append(elapsed_ms)
+        total_tokens_list.append(num_new_tokens)
+
+        tokens_per_sec = num_new_tokens / (elapsed_ms / 1000.0)
+        logging.info(
+            f"Run {i+1}: generated {num_new_tokens} tokens in {elapsed_ms:.2f} ms "
+            f"({tokens_per_sec:.2f} tokens/s)"
+        )
+
+    avg_time_ms = sum(gen_times) / n_runs
+    avg_tokens = sum(total_tokens_list) / n_runs
+    avg_tokens_per_sec = avg_tokens / (avg_time_ms / 1000.0)
+
+    logging.info(f"--- Generation Speed Summary ---")
+    logging.info(f"Average generated tokens: {avg_tokens:.1f}")
+    logging.info(f"Average generation time:  {avg_time_ms:.2f} ms")
+    logging.info(f"Average throughput:       {avg_tokens_per_sec:.2f} tokens/s")
+    logging.info(f"Average time per token:   {avg_time_ms / avg_tokens:.2f} ms/token")
 
 
 @torch.no_grad()

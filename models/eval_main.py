@@ -46,18 +46,20 @@ def loadModel(model_name, cache_dir=None):
 
   model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    use_cache=False,
-    dtype=dtype,
+    torch_dtype=dtype,
     device_map="auto",
     cache_dir=cache_dir,
-    low_cpu_mem_usage=True,
     trust_remote_code=True,
+    attn_implementation="flash_attention_2",
+    use_cache=True,
   )
+  
+  model.config.use_cache = True
 
   return model
   
 
-def get_calibration(dataset, tokenizer, num_samples, seq_len=2048, seed=0):
+def get_calibration(dataset, tokenizer, num_samples, seq_len=13684, seed=0):
   samples_indices = list(range(len(dataset)))
   if seed != 0:
     random.shuffle(samples_indices)
@@ -83,6 +85,7 @@ def parse_args():
 
   parser.add_argument('--main_table_results', help="Generate results for the main results table in the paper (Table 1)", action='store_true')
   parser.add_argument('--evaluate_inference', help="Measure the model's inference time", action='store_true')
+  parser.add_argument('--evaluate_generation', help="Measure the model's generation time", action='store_true')
   parser.add_argument('--evaluate_downstream', help="Perform downstream task evaluation at 37.5%% sparsity", action='store_true')
   parser.add_argument('--evaluate_perplexity', help="Evaluates perplexity on Wikitext2 only", action='store_true')
   parser.add_argument('--evaluate_qualitative', help="Qualitative results", action='store_true')
@@ -136,9 +139,9 @@ def main():
   
 
   logging.info("Dense model evaluation")
-  logging.info("Loading the model")    
+  logging.info("Loading the model")
   model = loadModel(args.model, args.cache_dir)
-  #model.set_attn_implementation("flash_attention_2")
+  #model = torch.compile(model)
   #model.init_scaler()
   logging.debug(model)
   printModelStats(model, "Dense model")
@@ -148,6 +151,12 @@ def main():
     first_calibration_sample = calibration_dataset[0]
     
     evaluate_inference_time(model, first_calibration_sample)
+    
+  if args.evaluate_generation == True:
+    calibration_dataset = get_calibration(dataset_c4_train, tokenizer, num_samples=1, seq_len=2048)
+    first_calibration_sample = calibration_dataset[0]
+    
+    evaluate_generation_speed(model, first_calibration_sample, n_runs=10, max_new_tokens=128)
 
   if args.evaluate_downstream == True:
     evaluation_downstream(args.model)
